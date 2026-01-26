@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Model Server Front End</title>
+  <link href="/static/styles.css?v=1.001" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+
+<body class="" style="background-color: white; ">
+  <div id="app">
+    <v-app>
+      <div class="top_bar home-page__section--dark-mode">
+        <h1 class="heading-1 home-page__heading home-page__search-heading">
+          Pythia <strong>Front End</strong>
+        </h1>
+      </div>
+      <main class="image-details" style="background-color: white; ">
+        <figure class="image-details__figure">
+          <div class="d-flex justify-space-between align-center">
+            <button id="uploadFile">
+              <i class="">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
+                </svg>
+              </i>
+              <span class="text-h5"> Upload file</span>
+            </button>
+            <button id="clearImage" hidden>
+              <i>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </i>
+              <span class="text-h5"> Clear</span>
+            </button>
+            <button id="grabSnapshot" hidden>
+              <i class="">
+                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                </svg>
+                </i>
+              <span class="text-h5"> Grab Snapshot</span>
+            </button>
+            <button id="backToVideo" hidden>
+              <i class="">
+
+              </i>
+              <span class="text-h5"> Back to Video</span>
+            </button>
+          </div>
+          <div>
+            <div id="hiddenError" style="color: red;"></div>
+          </div>
+          <div id="image_pane" class="" hidden>
+            <span class="concepts-figure">
+              <img id="preview" class="concepts-figure__image image-details__image"
+                style="background-color: #ccc; border: 1px solid black;" />
+              <span id="svgDiv" style="width: 100%; height: 100%"
+                class="concepts-figure__svg image-details__image"></span>
+            </span>
+          </div>
+          <div id="video_pane" class="" hidden>
+            <video id="htmlVideoTag" controls autoplay>
+              <p>Your browser doesn't support HTML5 video.</p>
+            </video>
+            <canvas id="hiddenCanvas" hidden></canvas>
+          </div>
+          <form id="msfe" class="image-details__form">
+            <div style="margin: 15px 0">
+              <p><i>Name: <span id="filename"></span></i></p>
+              <p><i>File size: <span id="fileSize"></span></i></p>
+              <p><i>File type: <span id="fileType"></span></i></p>
+            </div>
+
+            <label label for="file_upload" style="margin: 15px 0">
+              <div class="">
+                <input id="file_upload" type="file">
+              </div>
+            </label>
+          </form>
+        </figure>
+
+        <div class="image-details__meta-boxes">
+          <div class="d-flex justify-space-between">
+            <input id="runAlgoButton" type="submit" class="button" value="Run Algorithm"
+              title="Analyze an image or video frame" style="margin: 15px 0" disabled>
+              <button id="downloadResults" hidden class="">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download results
+              </button>
+          </div>
+          <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
+            <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
+              <div class="d-flex justify-space-between">
+              <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results
+                <em data-v-601a8666="" id="success" class="text-meta"></em>
+              </h3>
+
+
+              </div>
+
+            </summary>
+            <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
+            </ul>
+
+
+
+          </details>
+        </div>
+      </main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+    })
+  </script>
+  <script src="/static/scripts/model-server.js?v=1.001"></script>
+  <script type="text/javascript">
+    const pageElements = {
+      form: document.getElementById("msfe"),
+      submitButton: document.getElementById("runAlgoButton"),
+      fileInput: document.getElementById("file_upload"),
+      hiddenError: document.getElementById("hiddenError"),
+      previewImg: document.getElementById("preview"),
+      imagePane: document.getElementById("image_pane"),
+      svgDiv: document.getElementById("svgDiv"),
+      successEl: document.getElementById("success"),
+      predictionsEl: document.getElementById("predictions"),
+      filename: document.getElementById("filename"),
+      filesize: document.getElementById("fileSize"),
+      filetype: document.getElementById("fileType"),
+      downloadResults: document.getElementById("downloadResults"),
+      uploadHeading: document.getElementById("uploadFile"),
+      clearImage: document.getElementById("clearImage"),
+      htmlVideoTag: document.getElementById("htmlVideoTag"),
+      hiddenCanvas: document.getElementById("hiddenCanvas"),
+      videoPane: document.getElementById("video_pane"),
+      grabSnapshot: document.getElementById("grabSnapshot"),
+      backToVideo: document.getElementById("backToVideo"),
+    }
+
+    // Init page elements to js class
+    const msfe = new ModelServerFrontEnd(pageElements);
+
+  </script>
+</body>
+
+</html>
