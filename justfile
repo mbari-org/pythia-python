@@ -4,7 +4,7 @@ build:
 	docker push mbari/pythia-python
 
 
-# Run pythia-python locally using the provided model
+# Run pythia-python locally using the provided model (.pt)
 run model:
 	#!/usr/bin/env bash
 	set -euo pipefail
