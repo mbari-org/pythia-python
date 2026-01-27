@@ -1,6 +1,10 @@
+![MBARI Logo](static/logo-mbari-3b.png)
+
 # Pythia (Python)
 
 A Python version of Pythia using FastAPI and Ultralytics. This web service runs YOLO object detection predictions on images.
+
+![Pythia Screenshot](static/Pythia.png)
 
 ## Features
 
@@ -9,6 +13,24 @@ A Python version of Pythia using FastAPI and Ultralytics. This web service runs 
 - Supports YOLOv5 and YOLOv8 models (.pt files)
 - Swagger/OpenAPI documentation at `/docs`
 - Health check endpoint at `/q/health`
+
+## Quickstart
+
+You will need to have your trained model weights (.pt file). In the examples below, we are using `my_model.pt` but you can substitute whatever your one model name.
+
+### Run using docker (no-install)
+
+```sh
+docker run -d --name pythia-python --restart always -p 8080:8080 -v "/path/to/models:/models" mbari/pythia-python "/models/my_model.pt"
+```
+
+### Run using docker (from repo)
+
+```sh
+git clone git@github.com:mbari-org/pythia-python.git
+cd pythia-python
+just run-docker /path/to/models/my_model.pt
+```
 
 ## Installation
 
