@@ -2,7 +2,7 @@
 
 # Pythia (Python)
 
-A Python version of Pythia using FastAPI and Ultralytics. This web service runs YOLO object detection predictions on images.
+A Python version of [Pythia](https://github.com/mbari-org/pythia) using FastAPI and Ultralytics. This web service runs YOLO object detection predictions on images.
 
 ![Pythia Screenshot](static/Pythia.png)
 
