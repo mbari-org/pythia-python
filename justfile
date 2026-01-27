@@ -10,7 +10,9 @@ run-docker model:
 	echo {{model}}
 	MODEL_DIR=$(dirname '{{model}}')
 	MODEL_NAME=$(basename '{{model}}')
-	docker run -d --name pythia-python -p 8080:8080 -v "$MODEL_DIR:/models" mbari/pythia-python "/models/$MODEL_NAME"
+	docker stop pythia-python || true
+	docker rm pythia-python || true
+	docker run -d --name pythia-python --restart always -p 8080:8080 -v "$MODEL_DIR:/models" mbari/pythia-python "/models/$MODEL_NAME"
 
 # Run pythia-python locally using the provided model (.pt) 
 run model:
