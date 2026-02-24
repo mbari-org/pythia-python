@@ -21,7 +21,11 @@ You will need to have your trained model weights (.pt file). In the examples bel
 ### Run using docker (no-install)
 
 ```sh
-docker run -d --name pythia-python --restart always -p 8080:8080 -v "/path/to/models:/models" mbari/pythia-python "/models/my_model.pt"
+docker run -d --name pythia-python \
+    --restart always \
+    -p 8080:8080 \
+    -v "/path/to/models:/models" \
+    mbari/pythia-python "/models/my_model.pt"
 ```
 
 ### Run using docker (from repo)
