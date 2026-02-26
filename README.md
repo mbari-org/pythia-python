@@ -10,7 +10,7 @@ A Python version of [Pythia](https://github.com/mbari-org/pythia) using FastAPI 
 
 - REST API compatible with the Java version of Pythia
 - Web UI for uploading images and viewing detection results
-- Supports YOLOv5 and YOLOv8 models (.pt files)
+- Supports a side variety of [visual models](https://docs.ultralytics.com/models/).
 - Swagger/OpenAPI documentation at `/docs`
 - Health check endpoint at `/q/health`
 
