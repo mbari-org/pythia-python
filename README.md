@@ -160,7 +160,7 @@ This stops and removes any existing `pythia-python` container, then starts a new
 just build
 ```
 
-Builds the image for both `linux/amd64` and `linux/arm64` using `docker buildx` and pushes to `mbari/pythia-python` on Docker Hub. Requires `docker buildx` and push access to the registry.
+Builds the image for both `linux/amd64` and `linux/arm64` using `docker buildx` and pushes two tags to `mbari/pythia-python` on Docker Hub: `latest` and the current git tag (e.g. `1.2.0`). The git tag is resolved with `git describe --tags --abbrev=0`, so a tag must exist on the repository before building. Requires `docker buildx` and push access to the registry.
 
 ### Development mode (auto-reload)
 
