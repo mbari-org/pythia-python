@@ -1,6 +1,6 @@
 class ModelServerFrontEnd {
    constructor({ form, submitButton, fileInput, hiddenError, previewImg, imagePane, svgDiv, successEl, predictionsEl,
-      filename, filesize, filetype, downloadResults, clearImage, uploadHeading, htmlVideoTag, hiddenCanvas, videoPane, grabSnapshot, backToVideo }, a) {
+      filename, filesize, filetype, downloadResults, clearImage, uploadHeading, htmlVideoTag, hiddenCanvas, videoPane, grabSnapshot, uploadHint }, a) {
       this._svgDiv = svgDiv;
       this._currentSvg = null;
       this._scaleDiff = 0;
@@ -26,9 +26,9 @@ class ModelServerFrontEnd {
       this._videoPane = videoPane;
       this._htmlVideoTag = htmlVideoTag;
       this._grabSnapshot = grabSnapshot;
-      this._backToVideo = backToVideo;
 
       this._hiddenCanvas = hiddenCanvas;
+      this._uploadHint = uploadHint;
 
       this._acceptedImgTypes = ["apng", "avif", "jpeg", "gif", "png", "svg", "webp"];
       this._acceptedVideoTypes = ["mp4", "webm", "3gp", "mpeg", "quicktime", "ogg"];
@@ -47,11 +47,7 @@ class ModelServerFrontEnd {
 
       this._clearImage.addEventListener("click", this.clearAndRemoveFile.bind(this));
 
-      this._grabSnapshot.addEventListener("click", this.snapshotAndPreview.bind(this));
-
-      this._backToVideo.addEventListener("click", () => {
-         this.videoTmpHide(false);
-      });
+      this._grabSnapshot.addEventListener("click", this.downloadAnnotatedImage.bind(this));
    }
 
    draw = () => {
@@ -78,8 +74,9 @@ class ModelServerFrontEnd {
       this.clearImageResults();
       this._formBlobData = null;
 
-      this._clearImage.hidden = true;
-      this._uploadHeading.hidden = false;
+      this._clearImage.disabled = true;
+      this._uploadHeading.classList.add('btn--emphasis');
+      this._uploadHint.classList.remove('upload-hint--hidden');
 
       this._filename.innerHTML = "";
       this._filesize.innerHTML = "";
@@ -91,8 +88,7 @@ class ModelServerFrontEnd {
       this._videoPane.hidden = true;
       this._htmlVideoTag.hidden = false;
 
-      this._grabSnapshot.hidden = true;
-      this._backToVideo.hidden = true;
+      this._grabSnapshot.disabled = true;
    }
 
    clearImageResults() {
@@ -105,7 +101,8 @@ class ModelServerFrontEnd {
       this._previewImg.src = "";
       this._svgDiv.innerHTML = "";
 
-      this._downloadResults.hidden = true;
+      this._downloadResults.disabled = true;
+      this._grabSnapshot.disabled = true;
 
       this._submitButton.disabled = true;
       this._hiddenError.innerHTML = ``;
@@ -127,8 +124,9 @@ class ModelServerFrontEnd {
             this._formBlobData = file;
 
             this._previewImg.src = URL.createObjectURL(file);
-            this._clearImage.hidden = false;
-            this._uploadHeading.hidden = true;
+            this._clearImage.disabled = false;
+            this._uploadHeading.classList.remove('btn--emphasis');
+            this._uploadHint.classList.add('upload-hint--hidden');
             this._submitButton.disabled = false;
 
             this._previewImg.onload = (e) => {
@@ -140,7 +138,6 @@ class ModelServerFrontEnd {
             this._filename.innerHTML = file.name;
             this._filesize.innerHTML = file.size;
             this._filetype.innerHTML = file.type;
-            this._grabSnapshot.hidden = false;
 
             var url = URL.createObjectURL(new Blob([file]));
             this._htmlVideoTag.src = url;
@@ -150,8 +147,9 @@ class ModelServerFrontEnd {
                this._hiddenCanvas.width = this._htmlVideoTag.videoWidth;
                this._hiddenCanvas.height = this._htmlVideoTag.videoHeight;
                this._htmlVideoTag.type = file.type;
-               this._clearImage.hidden = false;
-               this._uploadHeading.hidden = true;
+               this._clearImage.disabled = false;
+               this._uploadHeading.classList.remove('btn--emphasis');
+               this._uploadHint.classList.add('upload-hint--hidden');
 
                this._videoPane.hidden = false;
                console.log("New *video* loaded.....")
@@ -164,26 +162,12 @@ class ModelServerFrontEnd {
 
    }
 
-   videoTmpHide = (bool) => {
-      if (bool) {
-         this._grabSnapshot.hidden = true;
-         this._backToVideo.hidden = false;
-         this._htmlVideoTag.hidden = true;
-      } else {
-         this.clearImageResults();
-         this._grabSnapshot.hidden = false;
-         this._backToVideo.hidden = true;
-         this._htmlVideoTag.hidden = false;
-      }
-   }
 
    _previewFromSnapshotUrl = (imgURL) => {
-      this.videoTmpHide(true);
-
       if (imgURL) {
          this._previewImg.src = imgURL;
-         this._clearImage.hidden = false;
-         this._uploadHeading.hidden = true;
+         this._clearImage.disabled = false;
+         this._uploadHeading.classList.remove('btn--emphasis');
          this._submitButton.disabled = false;
 
          this._previewImg.onload = (e) => {
@@ -215,9 +199,91 @@ class ModelServerFrontEnd {
       this._previewFromSnapshotUrl(frameURL);
    }
 
-   snapshotAndPreview = async () => {
-      this._htmlVideoTag.pause();
-      this._hiddenCanvas.toBlob(this.toBlobCallback);
+   downloadAnnotatedImage = async () => {
+      const filename = this._filename.innerText || 'image';
+      const lastDot = filename.lastIndexOf('.');
+      const base = lastDot >= 0 ? filename.slice(0, lastDot) : filename;
+      const ext  = lastDot >= 0 ? filename.slice(lastDot + 1) : 'png';
+      const downloadName = `${base}-pythia.${ext}`;
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = this._previewImg.naturalWidth;
+      canvas.height = this._previewImg.naturalHeight;
+      const ctx = canvas.getContext('2d');
+
+      ctx.drawImage(this._previewImg, 0, 0);
+
+      // Draw SVG overlay with text stripped out — SVG blob URLs load as a
+      // separate document and cannot access page-loaded web fonts.
+      const svgEl = this._svgDiv.querySelector('svg');
+      if (svgEl) {
+         const clone = svgEl.cloneNode(true);
+         clone.setAttribute('width',  canvas.width);
+         clone.setAttribute('height', canvas.height);
+         clone.querySelectorAll('text').forEach(t => t.remove());
+
+         const svgStr = new XMLSerializer().serializeToString(clone);
+         const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+         const svgUrl = URL.createObjectURL(svgBlob);
+
+         await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => { ctx.drawImage(img, 0, 0); URL.revokeObjectURL(svgUrl); resolve(); };
+            img.onerror = () => { URL.revokeObjectURL(svgUrl); resolve(); };
+            img.src = svgUrl;
+         });
+      }
+
+      // Redraw labels via canvas 2D, which shares the page's loaded fonts.
+      if (this._data && this._data.predictions) {
+         const strokeWidth = Math.min(canvas.height, 1080) / 200;
+         const fontSize    = Math.min(canvas.height, 1080) / 333 * 12;
+
+         await document.fonts.ready;
+         ctx.font         = `500 ${fontSize}px 'Hanken Grotesk', system-ui, sans-serif`;
+         ctx.textBaseline = 'alphabetic';
+
+         for (const prediction of this._data.predictions) {
+            const boundingBox = Array.isArray(prediction.bbox)
+               ? prediction.bbox : JSON.parse(prediction.bbox);
+
+            const bx1 = Number(boundingBox[0]) + strokeWidth / 2;
+            const by1 = Number(boundingBox[1]) + 2 * strokeWidth;
+            const bx2 = Number(boundingBox[2]) + strokeWidth / 2;
+            const by2 = Number(boundingBox[3]) + 2 * strokeWidth;
+            const bw  = bx2 - bx1;
+            const bh  = by2 - by1;
+
+            const hash = [...prediction.category_id].reduce(
+               (acc, ch) => ch.charCodeAt(0) + acc, 0);
+            ctx.fillStyle = `hsla(${hash % 360}, 100%, 85%, 1)`;
+
+            // Replicate labelXPosition (using natural image width)
+            const charApproxWidth = fontSize / 4;
+            const labelX = (prediction.category_id.length * charApproxWidth + bw) >= (canvas.width - bx1)
+               ? Math.floor(-(prediction.category_id.length * charApproxWidth))
+               : 0;
+
+            // Place label just above the top edge; fall back to inside-top if near image edge
+            const textY = (by1 - strokeWidth * 2) > fontSize
+               ? by1 - strokeWidth * 2
+               : by1 + fontSize + strokeWidth;
+
+            ctx.fillText(prediction.category_id, bx1 + labelX, textY);
+         }
+      }
+
+      const mimeType = ['jpg', 'jpeg'].includes(ext.toLowerCase()) ? 'image/jpeg' : 'image/png';
+      canvas.toBlob((blob) => {
+         const url = URL.createObjectURL(blob);
+         const a = document.createElement('a');
+         a.href = url;
+         a.download = downloadName;
+         document.body.appendChild(a);
+         a.click();
+         a.remove();
+         URL.revokeObjectURL(url);
+      }, mimeType);
    }
 
    postFile = () => {
@@ -270,11 +336,13 @@ class ModelServerFrontEnd {
       this._data = data;
       if (data.success !== null && data.success == true && data.predictions !== null) {
          this._successEl.innerHTML = data.predictions.length;
-         this._downloadResults.hidden = false;
+         this._downloadResults.disabled = false;
+         this._grabSnapshot.disabled = false;
       } else {
          this._successEl.innerHTML = "Error";
          this._data = null;
-         this._downloadResults.hidden = true;
+         this._downloadResults.disabled = true;
+         this._grabSnapshot.disabled = true;
       }
       if (data.predictions !== null) {
          this._predictionsEl.innerHTML = "";
@@ -332,9 +400,21 @@ class ModelServerFrontEnd {
          }
 
          this._svgDiv.innerHTML = this._currentSvg.outerHTML;
+
+         const listItems = [...this._predictionsEl.querySelectorAll('li')];
+         const svgGroups = [...this._svgDiv.querySelectorAll('.concepts-figure__svg-group')];
+
+         listItems.forEach((item, i) => {
+            item.addEventListener('mouseenter', () => {
+               svgGroups.forEach((g, j) => { g.style.opacity = i === j ? '1' : '0.15'; });
+            });
+            item.addEventListener('mouseleave', () => {
+               svgGroups.forEach(g => { g.style.opacity = ''; });
+            });
+         });
       } else {
          this._predictionsEl.innerHTML = "N/A";
-         this._downloadResults.hidden = true;
+         this._downloadResults.disabled = true;
       }
    }
 

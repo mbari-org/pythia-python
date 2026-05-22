@@ -1,132 +1,174 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
-  <title>Model Server Front End</title>
-  <link href="/static/styles.css?v=1.001" rel="stylesheet">
-
-  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Pythia — MBARI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body class="" style="background-color: white; ">
-  <div id="app">
-    <v-app>
-      <div class="top_bar home-page__section--dark-mode">
-        <h1 class="heading-1 home-page__heading home-page__search-heading">
-          Pythia <strong>Front End</strong>
-        </h1>
+<body>
+
+  <div class="ocean-bg"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+
+    <header>
+      <div class="wordmark">
+        <h1>Pythia</h1>
+        <img src="/static/logo-mbari-3b.png" alt="MBARI" class="mbari-logo">
       </div>
-      <main class="image-details" style="background-color: white; ">
-        <figure class="image-details__figure">
-          <div class="d-flex justify-space-between align-center">
-            <button id="uploadFile">
-              <i class="">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-                  <path d="M0 0h24v24H0z" fill="none" />
-                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
-                </svg>
-              </i>
-              <span class="text-h5"> Upload file</span>
-            </button>
-            <button id="clearImage" hidden>
-              <i>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-                  <path d="M0 0h24v24H0z" fill="none" />
-                  <path
-                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
-              </i>
-              <span class="text-h5"> Clear</span>
-            </button>
-            <button id="grabSnapshot" hidden>
-              <i class="">
-                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
-                </svg>
-                </i>
-              <span class="text-h5"> Grab Snapshot</span>
-            </button>
-            <button id="backToVideo" hidden>
-              <i class="">
+      <p class="tagline">Object Detection Service</p>
+      <div class="divider"></div>
+    </header>
 
-              </i>
-              <span class="text-h5"> Back to Video</span>
+    <main class="workspace">
+
+      <!-- Media panel -->
+      <div class="card panel-media">
+        <div class="panel-toolbar">
+          <span class="card-label">Input</span>
+          <div class="toolbar-actions">
+            <button id="uploadFile" class="btn btn--icon btn--emphasis">
+              <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 24 24" width="15" fill="currentColor">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+              Upload
+            </button>
+            <button id="clearImage" class="btn btn--icon" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 24 24" width="15" fill="currentColor">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+              Clear
+            </button>
+            <button id="grabSnapshot" class="btn btn--icon" disabled>
+              <svg height="15" viewBox="0 0 24 24" width="15" fill="currentColor">
+                <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>
+              </svg>
+              Snapshot
             </button>
           </div>
-          <div>
-            <div id="hiddenError" style="color: red;"></div>
-          </div>
-          <div id="image_pane" class="" hidden>
-            <span class="concepts-figure">
-              <img id="preview" class="concepts-figure__image image-details__image"
-                style="background-color: #ccc; border: 1px solid black;" />
-              <span id="svgDiv" style="width: 100%; height: 100%"
-                class="concepts-figure__svg image-details__image"></span>
-            </span>
-          </div>
-          <div id="video_pane" class="" hidden>
-            <video id="htmlVideoTag" controls autoplay>
-              <p>Your browser doesn't support HTML5 video.</p>
-            </video>
-            <canvas id="hiddenCanvas" hidden></canvas>
-          </div>
-          <form id="msfe" class="image-details__form">
-            <div style="margin: 15px 0">
-              <p><i>Name: <span id="filename"></span></i></p>
-              <p><i>File size: <span id="fileSize"></span></i></p>
-              <p><i>File type: <span id="fileType"></span></i></p>
-            </div>
-
-            <label label for="file_upload" style="margin: 15px 0">
-              <div class="">
-                <input id="file_upload" type="file">
-              </div>
-            </label>
-          </form>
-        </figure>
-
-        <div class="image-details__meta-boxes">
-          <div class="d-flex justify-space-between">
-            <input id="runAlgoButton" type="submit" class="button" value="Run Algorithm"
-              title="Analyze an image or video frame" style="margin: 15px 0" disabled>
-              <button id="downloadResults" hidden class="">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download results
-              </button>
-          </div>
-          <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
-            <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
-              <div class="d-flex justify-space-between">
-              <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results
-                <em data-v-601a8666="" id="success" class="text-meta"></em>
-              </h3>
-
-
-              </div>
-
-            </summary>
-            <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
-            </ul>
-
-
-
-          </details>
         </div>
-      </main>
-    </v-app>
+
+        <div id="hiddenError" class="error-msg"></div>
+
+        <div id="upload_hint" class="upload-hint">
+          <ol class="hint-steps">
+            <li class="hint-step">
+              <span class="hint-step__num">01</span>
+              <span class="hint-step__text">Click <strong>Upload</strong> to select an image</span>
+            </li>
+            <li class="hint-step">
+              <span class="hint-step__num">02</span>
+              <span class="hint-step__text">Press <strong>Run Algorithm</strong> to run inference</span>
+            </li>
+            <li class="hint-step">
+              <span class="hint-step__num">03</span>
+              <span class="hint-step__text">Detections appear in the <strong>Analysis</strong> panel</span>
+            </li>
+          </ol>
+        </div>
+
+        <div id="image_pane" hidden>
+          <span class="concepts-figure">
+            <img id="preview" class="concepts-figure__image image-details__image"/>
+            <span id="svgDiv" class="concepts-figure__svg image-details__image"></span>
+          </span>
+        </div>
+
+        <div id="video_pane" hidden>
+          <video id="htmlVideoTag" controls autoplay>
+            <p>Your browser doesn't support HTML5 video.</p>
+          </video>
+          <canvas id="hiddenCanvas" hidden></canvas>
+        </div>
+
+        <form id="msfe" class="file-meta">
+          <div class="meta-row">
+            <span class="meta-key">Name</span>
+            <span id="filename" class="meta-val"></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key">Size</span>
+            <span id="fileSize" class="meta-val"></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key">Type</span>
+            <span id="fileType" class="meta-val"></span>
+          </div>
+          <label for="file_upload">
+            <input id="file_upload" type="file">
+          </label>
+        </form>
+      </div>
+
+      <!-- Results panel -->
+      <div class="card panel-results">
+        <div class="panel-toolbar">
+          <span class="card-label">Analysis</span>
+          <button id="downloadResults" disabled class="btn btn--icon">
+            <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 24 24" width="15" fill="currentColor">
+              <path d="M0 0h24v24H0z" fill="none"/>
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Export
+          </button>
+        </div>
+
+        <input id="runAlgoButton" type="submit" class="btn btn--primary" value="Run Algorithm" disabled>
+
+        <details id="localizationBriefs" open class="results-section">
+          <summary class="results-summary">
+            <div class="results-heading-row">
+              <h3 class="results-heading">Detections</h3>
+              <em id="success" class="results-count"></em>
+            </div>
+          </summary>
+          <ul id="predictions" class="meta-box__list"></ul>
+        </details>
+      </div>
+
+    </main>
+
+    <footer>
+      <a href="https://www.mbari.org" class="nodecoration">Monterey Bay Aquarium Research Institute</a>
+    </footer>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script>
-    new Vue({
-      el: '#app',
-      vuetify: new Vuetify(),
-    })
+    const container = document.getElementById('particles');
+    const count = 42;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'particle';
+      const size = Math.random() * 2.5 + 0.8;
+      const left = Math.random() * 100;
+      const delay = Math.random() * 22;
+      const dur = Math.random() * 18 + 14;
+      const drift = (Math.random() - 0.5) * 120;
+      const opacity = Math.random() * 0.35 + 0.05;
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${left}%;
+        bottom:${Math.random() * -20}%;
+        animation-duration:${dur}s;
+        animation-delay:-${delay}s;
+        --max-opacity:${opacity};
+        --drift:${drift}px;
+      `;
+      container.appendChild(p);
+    }
   </script>
-  <script src="/static/scripts/model-server.js?v=1.001"></script>
-  <script type="text/javascript">
+  <script src="/static/scripts/model-server.js"></script>
+  <script>
     const pageElements = {
       form: document.getElementById("msfe"),
       submitButton: document.getElementById("runAlgoButton"),
@@ -147,13 +189,11 @@
       hiddenCanvas: document.getElementById("hiddenCanvas"),
       videoPane: document.getElementById("video_pane"),
       grabSnapshot: document.getElementById("grabSnapshot"),
-      backToVideo: document.getElementById("backToVideo"),
-    }
-
-    // Init page elements to js class
+      uploadHint: document.getElementById("upload_hint"),
+    };
     const msfe = new ModelServerFrontEnd(pageElements);
-
   </script>
+
 </body>
 
 </html>
