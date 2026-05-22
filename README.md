@@ -114,21 +114,58 @@ Health check endpoint.
 ### GET /docs
 Swagger UI documentation.
 
-## Docker
-
-```bash
-# Build image
-docker build -t pythia-python .
-
-# Run container
-docker run -p 8080:8080 -v /path/to/models:/models pythia-python /models/your-model.pt
-```
-
 ## Development
 
+### Prerequisites
+
+This project uses [just](https://just.systems) as a command runner. Install it via your package manager:
+
 ```bash
-# Run in development mode with auto-reload
+# macOS
+brew install just
+
+# Linux (cargo)
+cargo install just
+
+# Other platforms: https://just.systems/man/en/chapter_4.html
+```
+
+### Justfile recipes
+
+| Recipe | Description |
+|---|---|
+| `just run <model>` | Run the server locally with the given model |
+| `just run-docker <model>` | Run in Docker, mounting the model's directory into the container |
+| `just build` | Build and push a multi-arch (`linux/amd64`, `linux/arm64`) Docker image to Docker Hub |
+
+#### Run locally
+
+```bash
+just run /path/to/your/model.pt
+```
+
+This is equivalent to `python main.py /path/to/your/model.pt` and starts the server on port 8080.
+
+#### Run in Docker
+
+```bash
+just run-docker /path/to/models/my_model.pt
+```
+
+This stops and removes any existing `pythia-python` container, then starts a new one with `--restart always` on port 8080. The model's parent directory is mounted into the container at `/models`.
+
+#### Build and push
+
+```bash
+just build
+```
+
+Builds the image for both `linux/amd64` and `linux/arm64` using `docker buildx` and pushes to `mbari/pythia-python` on Docker Hub. Requires `docker buildx` and push access to the registry.
+
+### Development mode (auto-reload)
+
+```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-Note: When running in development mode, you need to set the model path via environment or modify the code since the CLI args won't work with uvicorn directly.
+Note: When running in development mode, the model path must be set by modifying `model_path` directly in the code, as CLI args are not parsed when using uvicorn directly.
