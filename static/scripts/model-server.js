@@ -312,7 +312,7 @@ class ModelServerFrontEnd {
       };
 
       this._successEl.innerHTML = "Loading....";
-      fetch("/predictor", requestOptions)
+      fetch("predictor", requestOptions)
          .then(response => response.json())
          .then(data => {
             console.log(data);
