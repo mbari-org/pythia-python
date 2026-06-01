@@ -261,7 +261,7 @@ def main():
     if root_path:
         from starlette.applications import Starlette
         from starlette.routing import Mount
-        container = Starlette(routes=[Mount(root_path, app=app)])
+        container = Starlette(routes=[Mount(root_path, app=app)], lifespan=lifespan)
         uvicorn.run(container, host=args.host, port=args.port)
     else:
         uvicorn.run(app, host=args.host, port=args.port)
