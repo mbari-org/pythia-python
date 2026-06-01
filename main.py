@@ -6,19 +6,22 @@ A web service for running YOLO object detection predictions on images.
 import argparse
 import asyncio
 from contextlib import asynccontextmanager
+import os
 from pathlib import Path
 from queue import Queue
 from threading import Thread
 from typing import Optional
 import tempfile
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Request, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from PIL import Image
 from ultralytics import YOLO
+
+root_path = os.environ.get("ROOT_PATH", "")
 
 # Global state
 model: Optional[YOLO] = None
@@ -127,7 +130,8 @@ app = FastAPI(
     title="Pythia",
     description="Web service for YOLO object detection predictions",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    root_path=root_path,
 )
 
 # CORS configuration
@@ -146,12 +150,14 @@ if static_dir.exists():
 
 
 @app.get("/")
-async def root():
-    """Serve the main page - redirect to index.html."""
-    from fastapi.responses import FileResponse
+async def root(request: Request):
+    """Serve the main page with a <base> tag for correct sub-path resolution."""
     index_path = static_dir / "index.html"
     if index_path.exists():
-        return FileResponse(index_path)
+        rp = request.scope.get("root_path", "").rstrip("/")
+        html = index_path.read_text()
+        html = html.replace("<head>", f'<head>\n  <base href="{rp}/">', 1)
+        return HTMLResponse(content=html)
     return {"message": "Pythia API is running. Use /docs for API documentation."}
 
 
@@ -251,7 +257,7 @@ def main():
     threshold = args.threshold
 
     import uvicorn
-    uvicorn.run(app, host=args.host, port=args.port)
+    uvicorn.run(app, host=args.host, port=args.port, root_path=root_path)
 
 
 if __name__ == "__main__":
