@@ -6,6 +6,7 @@ A web service for running YOLO object detection predictions on images.
 import argparse
 import asyncio
 from contextlib import asynccontextmanager
+from html import escape
 import os
 from pathlib import Path
 from queue import Queue
@@ -154,7 +155,7 @@ async def root(request: Request):
     """Serve the main page with a <base> tag for correct sub-path resolution."""
     index_path = static_dir / "index.html"
     if index_path.exists():
-        rp = request.scope.get("root_path", "").rstrip("/")
+        rp = escape(request.scope.get("root_path", "").rstrip("/"))
         html = index_path.read_text()
         html = html.replace("<head>", f'<head>\n  <base href="{rp}/">', 1)
         return HTMLResponse(content=html)
