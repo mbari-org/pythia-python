@@ -258,7 +258,13 @@ def main():
     threshold = args.threshold
 
     import uvicorn
-    uvicorn.run(app, host=args.host, port=args.port, root_path=root_path)
+    if root_path:
+        from starlette.applications import Starlette
+        from starlette.routing import Mount
+        container = Starlette(routes=[Mount(root_path, app=app)])
+        uvicorn.run(container, host=args.host, port=args.port)
+    else:
+        uvicorn.run(app, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":
