@@ -156,7 +156,7 @@ async def root(request: Request):
     index_path = static_dir / "index.html"
     if index_path.exists():
         rp = escape(request.scope.get("root_path", "").rstrip("/"))
-        html = index_path.read_text()
+        html = index_path.read_text(encoding="utf-8")
         html = html.replace("<head>", f'<head>\n  <base href="{rp}/">', 1)
         return HTMLResponse(content=html)
     return {"message": "Pythia API is running. Use /docs for API documentation."}

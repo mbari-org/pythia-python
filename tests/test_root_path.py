@@ -30,6 +30,13 @@ def test_root_with_trailing_slash_context_path_normalises():
     assert '<base href="/pythia//">' not in response.text
 
 
+def test_root_path_special_chars_are_html_escaped():
+    with TestClient(app, root_path='/x"><script>alert(1)</script>') as client:
+        response = client.get("/")
+    assert '"><script>' not in response.text
+    assert "&lt;script&gt;" in response.text
+
+
 def test_health_endpoint():
     with TestClient(app) as client:
         response = client.get("/q/health")
