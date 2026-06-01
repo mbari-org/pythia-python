@@ -257,6 +257,9 @@ def main():
     model_path = args.model
     threshold = args.threshold
 
+    if root_path:
+        print(f"Serving under context path: {root_path}")
+
     import uvicorn
     if root_path:
         from starlette.applications import Starlette
