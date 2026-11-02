@@ -233,8 +233,8 @@ def main():
     parser.add_argument(
         "--host",
         type=str,
-        default="0.0.0.0",
-        help="Host to bind to (default: 0.0.0.0)"
+        default="",
+        help='Host to bind to (default: "" = all IPv4 and IPv6 interfaces)'
     )
     parser.add_argument(
         "--port",
