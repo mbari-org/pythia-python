@@ -135,8 +135,11 @@ cargo install just
 | Recipe | Description |
 |---|---|
 | `just run <model>` | Run the server locally with the given model |
+| `just` | List all available recipes |
 | `just run-docker <model>` | Run in Docker, mounting the model's directory into the container |
-| `just build` | Build and push a multi-arch (`linux/amd64`, `linux/arm64`) Docker image to Docker Hub |
+| `just run-podman <model>` | Run in Podman, mounting the model's directory and enabling the NVIDIA GPU if available |
+| `just build-docker` | Build and push a multi-arch (`linux/amd64`, `linux/arm64`) image to Docker Hub with Docker |
+| `just build-podman` | Build and push a multi-arch (`linux/amd64`, `linux/arm64`) image to Docker Hub with Podman |
 
 #### Run locally
 
@@ -154,13 +157,23 @@ just run-docker /path/to/models/my_model.pt
 
 This stops and removes any existing `pythia-python` container, then starts a new one with `--restart always` on port 8080. The model's parent directory is mounted into the container at `/models`.
 
+#### Run in Podman
+
+```bash
+just run-podman /path/to/models/my_model.pt
+```
+
+Same as `run-docker`, but uses rootless Podman and mounts the model directory read-only. If the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is installed and a CDI spec has been generated (`sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml`), the container is given access to all GPUs (`--device nvidia.com/gpu=all`); otherwise it runs on the CPU.
+
+With rootless Podman, `--restart always` only restarts the container after a crash. To start it again after a reboot, run `systemctl --user enable --now podman-restart.service` and `sudo loginctl enable-linger $USER` once.
+
 #### Build and push
 
 ```bash
-just build
+just build-docker   # or: just build-podman
 ```
 
-Builds the image for both `linux/amd64` and `linux/arm64` using `docker buildx` and pushes two tags to `mbari/pythia-python` on Docker Hub: `latest` and the current git tag (e.g. `1.2.0`). The git tag is resolved with `git describe --tags --abbrev=0`, so a tag must exist on the repository before building. Requires `docker buildx` and push access to the registry.
+Builds the image for both `linux/amd64` and `linux/arm64` using `docker buildx` and pushes two tags to `mbari/pythia-python` on Docker Hub: `latest` and the current git tag (e.g. `1.2.0`). The git tag is resolved with `git describe --tags --abbrev=0`, so a tag must exist on the repository before building. `build-docker` requires `docker buildx`; `build-podman` requires `qemu-user-static` (for the non-native architecture) and `podman login docker.io`. Both require push access to the registry.
 
 ### Development mode (auto-reload)
 
